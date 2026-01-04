@@ -57,8 +57,15 @@ Brief Tip: [One short styling tip based on the weather/occasion]
         }
     }
 
+    start_time = time.perf_counter()
+
     response = requests.post(OLLAMA_URL, json=payload)
     response.raise_for_status()
+    end_time = time.perf_counter()
+
+    response_time = end_time - start_time
+    print(f"\n⏱️ Ollama response time: {response_time:.2f} seconds\n")
 
     return response.json()["response"].strip()
+
 
