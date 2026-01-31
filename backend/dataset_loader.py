@@ -36,6 +36,8 @@ class FashionDatasetLoader:
         if os.path.exists(self.cache_file):
             try:
                 with open(self.cache_file, 'rb') as f:
+                    # Note: Using pickle for convenience with mock data only
+                    # In production, use JSON or secure serialization
                     self.dataset = pickle.load(f)
                 return
             except Exception as e:

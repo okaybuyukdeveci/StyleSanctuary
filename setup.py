@@ -111,7 +111,7 @@ def check_dependencies():
     required_packages = [
         "streamlit",
         "requests",
-        "dotenv",
+        "python-dotenv",
         "PIL",
         "pandas"
     ]
@@ -120,7 +120,7 @@ def check_dependencies():
     
     for package in required_packages:
         try:
-            if package == "dotenv":
+            if package == "python-dotenv":
                 __import__("dotenv")
             elif package == "PIL":
                 __import__("PIL")

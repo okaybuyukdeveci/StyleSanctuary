@@ -2,6 +2,8 @@
 
 AI destekli, hava durumuna göre kişiselleştirilmiş kombin önerisi uygulaması.
 
+> **Note**: This application interface is in Turkish (Türkçe). The codebase and documentation use English for developer accessibility.
+
 ## ✨ Özellikler
 
 - 🌤️ **Canlı Hava Durumu**: 5 şehir için anlık hava durumu
