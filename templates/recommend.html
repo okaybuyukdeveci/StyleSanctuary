@@ -128,10 +128,10 @@ document.getElementById('recommendForm').addEventListener('submit', async (e) =>
             currentRecommendation = data;
             displayResults(data);
         } else {
-            alert('Failed to get recommendation. Please try again.');
+            showToast('Failed to get recommendation: ' + (data.detail || 'Please try again.'), 'error');
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        showToast('Unable to connect to the server. Please check your internet connection and try again.', 'error');
     } finally {
         btnText.style.display = 'inline';
         btnLoading.style.display = 'none';
@@ -186,12 +186,12 @@ document.getElementById('saveOutfitBtn').addEventListener('click', () => {
         document.getElementById('saveCity').value = currentRecommendation.weather.city;
         document.getElementById('saveTemp').value = currentRecommendation.weather.temperature;
         
-        // Parse recommendation text to extract components (simplified)
+        // Store full recommendation in hidden field
         const rec = currentRecommendation.recommendation;
-        document.getElementById('saveUpper').value = 'See recommendation';
-        document.getElementById('saveLower').value = 'See recommendation';
-        document.getElementById('saveShoes').value = 'See recommendation';
-        document.getElementById('saveAccessories').value = 'See recommendation';
+        document.getElementById('saveUpper').value = 'Custom AI Recommendation - See details';
+        document.getElementById('saveLower').value = 'Custom AI Recommendation - See details';
+        document.getElementById('saveShoes').value = 'Custom AI Recommendation - See details';
+        document.getElementById('saveAccessories').value = 'Custom AI Recommendation - See details';
     }
 });
 
@@ -213,12 +213,12 @@ document.getElementById('saveForm').addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (data.success) {
-            alert('Outfit saved successfully!');
+            showToast('Outfit saved successfully!', 'success');
             document.getElementById('saveModal').style.display = 'none';
             document.getElementById('saveForm').reset();
         }
     } catch (error) {
-        alert('Error saving outfit: ' + error.message);
+        showToast('Error saving outfit: ' + error.message, 'error');
     }
 });
 </script>

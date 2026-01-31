@@ -115,7 +115,7 @@ async def recommend_outfit(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/save-outfit")
-async def save_outfit_api(
+async def save_outfit_endpoint(
     outfit_name: str = Form(...),
     upper: str = Form(...),
     lower: str = Form(...),
