@@ -65,7 +65,7 @@ Bu script:
 - ✓ SQLite database'i oluşturur
 - ✓ Ortam değişkenlerini kontrol eder
 
-> **Not**: İlk kurulum sırasında FashionRec dataset'i indirilir (~500MB). Bu işlem 10-15 dakika sürebilir. Dataset cache'lendikten sonra yüklemeler hızlı olacaktır.
+> **Not:** İlk kurulum sırasında FashionRec dataset'i indirilir (~500MB). Bu işlem 10-15 dakika sürebilir. Dataset cache'lendikten sonra yüklemeler hızlı olacaktır.
 
 6. **Uygulamayı başlatın**
 
@@ -181,7 +181,7 @@ Bu proje [HuggingFace FashionRec Dataset](https://huggingface.co/datasets/Anony1
 - **Mevsimler**: Spring, Summer, Fall, Winter
 - **Cinsiyetler**: Male, Female, Unisex
 
-> **Not**: Dataset indirilemezse, uygulama otomatik olarak fallback mock data'ya geçer ve çalışmaya devam eder.
+> **Not:** Dataset indirilemezse, uygulama otomatik olarak fallback mock data'ya geçer ve çalışmaya devam eder.
 
 ## 🎨 Özelleştirme
 

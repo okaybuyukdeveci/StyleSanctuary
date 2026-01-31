@@ -125,32 +125,26 @@ def check_dependencies():
     """Check if required packages are installed"""
     print("📦 Checking dependencies...")
     
+    # Package names match requirements.txt for consistency
     required_packages = [
-        "streamlit",
-        "requests",
-        "python-dotenv",
-        "PIL",
-        "pandas",
-        "datasets",
-        "huggingface-hub"
+        ("streamlit", "streamlit"),
+        ("requests", "requests"),
+        ("python-dotenv", "dotenv"),
+        ("PIL", "PIL"),
+        ("pandas", "pandas"),
+        ("datasets", "datasets"),
+        ("huggingface-hub", "huggingface_hub")
     ]
     
     missing_packages = []
     
-    for package in required_packages:
+    for display_name, import_name in required_packages:
         try:
-            if package == "python-dotenv":
-                __import__("dotenv")
-            elif package == "PIL":
-                __import__("PIL")
-            elif package == "huggingface-hub":
-                __import__("huggingface_hub")
-            else:
-                __import__(package)
-            print(f"   ✓ {package}")
+            __import__(import_name)
+            print(f"   ✓ {display_name}")
         except ImportError:
-            print(f"   ❌ {package} not found")
-            missing_packages.append(package)
+            print(f"   ❌ {display_name} not found")
+            missing_packages.append(display_name)
     
     if missing_packages:
         print(f"\n   ⚠️  Missing packages detected!")

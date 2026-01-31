@@ -13,6 +13,10 @@ class FashionDatasetLoader:
     Loads real FashionRec dataset from HuggingFace or falls back to mock data if unavailable.
     """
     
+    # Temperature thresholds for weather-based filtering (Celsius)
+    COLD_THRESHOLD = 10
+    HOT_THRESHOLD = 25
+    
     def __init__(self, cache_dir: str = "data/fashion_dataset"):
         """
         Initialize the dataset loader
@@ -46,7 +50,8 @@ class FashionDatasetLoader:
         try:
             from datasets import load_dataset
             
-            # Load only the train split (smaller portion - 50%)
+            # Load only half of the dataset (first 50% of available data)
+            # Note: The split notation may vary depending on dataset structure
             dataset = load_dataset("Anony100/FashionRec", split="train[:50%]")
             
             # Convert to list of dicts
@@ -220,12 +225,12 @@ class FashionDatasetLoader:
         filtered = [item for item in self.dataset 
                    if category.lower() in item["category"].lower()]
         
-        # Weather-based filtering
+        # Weather-based filtering using class constants
         if weather_temp is not None:
-            if weather_temp < 10:  # Cold
+            if weather_temp < self.COLD_THRESHOLD:  # Cold
                 filtered = [item for item in filtered 
                            if item["season"].lower() in ["winter", "fall", "all-season"]]
-            elif weather_temp > 25:  # Hot
+            elif weather_temp > self.HOT_THRESHOLD:  # Hot
                 filtered = [item for item in filtered 
                            if item["season"].lower() in ["summer", "spring", "all-season"]]
         
