@@ -4,11 +4,11 @@ streamlit==1.31.0
 # Existing
 requests==2.31.0
 
-# Dataset (for future production use with real FashionRec dataset)
-# datasets==2.16.0
-# huggingface-hub==0.20.0
+# Dataset - HuggingFace FashionRec dataset
+datasets>=2.16.0
+huggingface-hub>=0.20.0
 
 # Utilities
 python-dotenv==1.0.0
 pillow>=10.3.0
-pandas==2.2.0
+pandas>=2.2.0

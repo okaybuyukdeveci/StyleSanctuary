@@ -62,6 +62,23 @@ def setup_dataset():
         return False
 
 
+def download_fashionrec_dataset():
+    """Download FashionRec dataset on first setup"""
+    print("🌐 Downloading FashionRec dataset...")
+    
+    try:
+        from backend.dataset_loader import FashionDatasetLoader
+        
+        loader = FashionDatasetLoader()
+        print(f"   ✓ Dataset downloaded and cached with {len(loader.dataset)} items")
+        print("✅ FashionRec dataset ready!\n")
+        return True
+    except Exception as e:
+        print(f"   ❌ Dataset download failed: {e}")
+        print("   ⚠️  App will use fallback mock data\n")
+        return False
+
+
 def check_env_file():
     """Check if .env file exists and guide user"""
     print("🔑 Checking environment configuration...")
@@ -113,7 +130,9 @@ def check_dependencies():
         "requests",
         "python-dotenv",
         "PIL",
-        "pandas"
+        "pandas",
+        "datasets",
+        "huggingface-hub"
     ]
     
     missing_packages = []
@@ -124,6 +143,8 @@ def check_dependencies():
                 __import__("dotenv")
             elif package == "PIL":
                 __import__("PIL")
+            elif package == "huggingface-hub":
+                __import__("huggingface_hub")
             else:
                 __import__(package)
             print(f"   ✓ {package}")
@@ -160,8 +181,8 @@ def main():
     # Setup database
     db_ok = setup_database()
     
-    # Setup dataset
-    dataset_ok = setup_dataset()
+    # Download FashionRec dataset
+    dataset_ok = download_fashionrec_dataset()
     
     # Check environment
     check_env_file()

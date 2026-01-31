@@ -3,15 +3,14 @@ import os
 import json
 import random
 from typing import List, Dict, Optional
-import pickle
+from pathlib import Path
 
 
 class FashionDatasetLoader:
     """
     Manages FashionRec dataset from Hugging Face
     
-    Note: This is a simplified implementation that uses mock data.
-    For production, integrate with Hugging Face datasets library.
+    Loads real FashionRec dataset from HuggingFace or falls back to mock data if unavailable.
     """
     
     def __init__(self, cache_dir: str = "data/fashion_dataset"):
@@ -21,44 +20,84 @@ class FashionDatasetLoader:
         Args:
             cache_dir: Directory to cache dataset files
         """
-        self.cache_dir = cache_dir
+        self.cache_dir = Path(cache_dir)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.dataset = None
-        self.cache_file = os.path.join(cache_dir, "dataset_cache.pkl")
         
-        # Create cache directory if it doesn't exist
-        os.makedirs(cache_dir, exist_ok=True)
-        
-        # Load or create mock dataset
-        self._load_or_create_dataset()
+        # Load FashionRec dataset
+        self.dataset = self._load_fashionrec_dataset()
     
-    def _load_or_create_dataset(self):
-        """Load cached dataset or create mock data"""
-        if os.path.exists(self.cache_file):
+    def _load_fashionrec_dataset(self):
+        """Load FashionRec dataset from HuggingFace (only half of it)"""
+        cache_file = self.cache_dir / "fashionrec_cache.json"
+        
+        # Check if cached version exists
+        if cache_file.exists():
+            print("📦 Loading cached FashionRec dataset...")
             try:
-                with open(self.cache_file, 'rb') as f:
-                    # Note: Using pickle for convenience with mock data only
-                    # In production, use JSON or secure serialization
-                    self.dataset = pickle.load(f)
-                return
+                with open(cache_file, 'r') as f:
+                    data = json.load(f)
+                print(f"✅ Loaded {len(data)} items from cache")
+                return data
             except Exception as e:
-                print(f"Error loading cache: {e}")
+                print(f"⚠️  Error loading cache: {e}")
         
-        # Create mock dataset
-        self.dataset = self._create_mock_dataset()
-        
-        # Save to cache
+        print("🌐 Downloading FashionRec dataset from HuggingFace...")
         try:
-            with open(self.cache_file, 'wb') as f:
-                pickle.dump(self.dataset, f)
+            from datasets import load_dataset
+            
+            # Load only the train split (smaller portion - 50%)
+            dataset = load_dataset("Anony100/FashionRec", split="train[:50%]")
+            
+            # Convert to list of dicts
+            processed_data = []
+            for idx, item in enumerate(dataset):
+                processed_item = {
+                    "id": f"fashionrec_{idx}",
+                    "title": item.get("product_name", f"Outfit {idx}"),
+                    "image_url": item.get("image", ""),
+                    "category": item.get("category", "casual"),
+                    "gender": item.get("gender", "unisex"),
+                    "season": self._infer_season(item),
+                    "style": item.get("style", "casual"),
+                    "color": item.get("color", "neutral"),
+                    "tags": item.get("tags", [])
+                }
+                processed_data.append(processed_item)
+            
+            # Cache for future use
+            with open(cache_file, 'w') as f:
+                json.dump(processed_data, f)
+            
+            print(f"✅ Loaded {len(processed_data)} items from FashionRec dataset")
+            return processed_data
+            
         except Exception as e:
-            print(f"Error saving cache: {e}")
+            print(f"❌ Error loading FashionRec dataset: {e}")
+            print("⚠️  Falling back to mock data...")
+            return self._generate_mock_data()
     
-    def _create_mock_dataset(self) -> List[Dict]:
-        """Create mock fashion dataset for demonstration"""
+    def _infer_season(self, item):
+        """Infer season from item metadata"""
+        category = item.get("category", "").lower()
+        tags = str(item.get("tags", "")).lower()
+        
+        if any(word in category or word in tags for word in ["summer", "short", "tank", "sandal"]):
+            return "summer"
+        elif any(word in category or word in tags for word in ["winter", "coat", "jacket", "boot"]):
+            return "winter"
+        elif any(word in category or word in tags for word in ["spring", "light"]):
+            return "spring"
+        elif any(word in category or word in tags for word in ["fall", "autumn"]):
+            return "fall"
+        return "all-season"
+    
+    def _generate_mock_data(self) -> List[Dict]:
+        """Create mock fashion dataset for demonstration (fallback)"""
         styles = ["Casual", "Formal", "Sporty", "Chic", "Classic"]
-        seasons = ["Spring", "Summer", "Fall", "Winter"]
-        genders = ["Male", "Female", "Unisex"]
-        categories = ["Upper", "Lower", "Shoes", "Accessories", "Outfit"]
+        seasons = ["spring", "summer", "fall", "winter"]
+        genders = ["male", "female", "unisex"]
+        categories = ["top", "bottom", "shoes", "accessories", "outfit"]
         
         # Mock image URLs (using placeholder images)
         base_url = "https://via.placeholder.com/300x400"
@@ -66,7 +105,7 @@ class FashionDatasetLoader:
         dataset = []
         for i in range(500):
             item = {
-                "id": i,
+                "id": f"mock_{i}",
                 "title": f"Fashion Item {i+1}",
                 "image_url": f"{base_url}/CCCCCC/666666?text=Item+{i+1}",
                 "category": random.choice(categories),
@@ -82,17 +121,13 @@ class FashionDatasetLoader:
     
     def download_dataset(self, split: str = "train", limit: int = 500):
         """
-        Download dataset from Hugging Face (placeholder for actual implementation)
+        Download dataset from Hugging Face (compatibility method)
         
         Args:
             split: Dataset split to download
             limit: Number of items to download
         """
-        # This would use the datasets library in production:
-        # from datasets import load_dataset
-        # dataset = load_dataset("Anony100/FashionRec", split=f"train[:{limit}]", cache_dir=self.cache_dir)
-        
-        print(f"📦 Using mock dataset with {len(self.dataset)} items")
+        print(f"📦 Dataset ready with {len(self.dataset)} items")
         return self.dataset
     
     def get_random_outfits(self, 
@@ -104,8 +139,8 @@ class FashionDatasetLoader:
         Get random outfit recommendations with optional filtering
         
         Args:
-            gender: Filter by gender (Male/Female/Unisex)
-            season: Filter by season (Spring/Summer/Fall/Winter)
+            gender: Filter by gender (male/female/unisex)
+            season: Filter by season (spring/summer/fall/winter)
             style: Filter by style (Casual/Formal/Sporty/Chic)
             count: Number of outfits to return
             
@@ -114,15 +149,18 @@ class FashionDatasetLoader:
         """
         filtered = self.dataset.copy()
         
-        # Apply filters
-        if gender:
-            filtered = [item for item in filtered if item['gender'] == gender or item['gender'] == 'Unisex']
+        # Apply filters (case-insensitive)
+        if gender and gender.lower() != "unisex":
+            filtered = [item for item in filtered 
+                       if item['gender'].lower() in [gender.lower(), "unisex"]]
         
         if season:
-            filtered = [item for item in filtered if item['season'] == season]
+            filtered = [item for item in filtered 
+                       if item['season'].lower() in [season.lower(), "all-season"]]
         
         if style:
-            filtered = [item for item in filtered if item['style'] == style]
+            filtered = [item for item in filtered 
+                       if style.lower() in item['style'].lower()]
         
         # Return random selection
         if len(filtered) > count:
@@ -145,26 +183,56 @@ class FashionDatasetLoader:
         result = {}
         
         # Find upper garment
-        upper_items = [item for item in self.dataset if item['category'] == 'Upper']
+        upper_items = [item for item in self.dataset if 'upper' in item['category'].lower() or 'top' in item['category'].lower()]
         if upper_items:
             result['upper'] = random.choice(upper_items)
         
         # Find lower garment
-        lower_items = [item for item in self.dataset if item['category'] == 'Lower']
+        lower_items = [item for item in self.dataset if 'lower' in item['category'].lower() or 'bottom' in item['category'].lower()]
         if lower_items:
             result['lower'] = random.choice(lower_items)
         
         # Find shoes
-        shoes_items = [item for item in self.dataset if item['category'] == 'Shoes']
+        shoes_items = [item for item in self.dataset if 'shoe' in item['category'].lower()]
         if shoes_items:
             result['shoes'] = random.choice(shoes_items)
         
         # Find accessories
-        accessories_items = [item for item in self.dataset if item['category'] == 'Accessories']
+        accessories_items = [item for item in self.dataset if 'accessor' in item['category'].lower()]
         if accessories_items:
             result['accessories'] = random.choice(accessories_items)
         
         return result
+    
+    def get_items_by_category(self, category: str, weather_temp: Optional[float] = None, count: int = 5) -> List[Dict]:
+        """
+        Get items by category (tops, bottoms, shoes, accessories)
+        
+        Args:
+            category: Category to filter by
+            weather_temp: Optional temperature for weather-based filtering
+            count: Number of items to return
+            
+        Returns:
+            List of matching items
+        """
+        # Filter by category
+        filtered = [item for item in self.dataset 
+                   if category.lower() in item["category"].lower()]
+        
+        # Weather-based filtering
+        if weather_temp is not None:
+            if weather_temp < 10:  # Cold
+                filtered = [item for item in filtered 
+                           if item["season"].lower() in ["winter", "fall", "all-season"]]
+            elif weather_temp > 25:  # Hot
+                filtered = [item for item in filtered 
+                           if item["season"].lower() in ["summer", "spring", "all-season"]]
+        
+        # Return random selection
+        if len(filtered) > count:
+            return random.sample(filtered, count)
+        return filtered
     
     def search_outfits(self, query: str, filters: Optional[Dict] = None) -> List[Dict]:
         """
@@ -210,12 +278,12 @@ class FashionDatasetLoader:
         """
         # Determine appropriate season based on temperature
         if temperature <= 5:
-            season = "Winter"
+            season = "winter"
         elif temperature <= 15:
-            season = "Fall"
+            season = "fall"
         elif temperature <= 25:
-            season = "Spring"
+            season = "spring"
         else:
-            season = "Summer"
+            season = "summer"
         
         return self.get_random_outfits(season=season, count=12)

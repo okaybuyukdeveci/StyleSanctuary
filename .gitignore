@@ -1,5 +1,8 @@
 # Dataset (large files)
 data/fashion_dataset/
+data/fashion_dataset/fashionrec_cache.json
+data/fashion_dataset/*.parquet
+data/fashion_dataset/*.arrow
 *.db
 *.sqlite
 *.pkl
