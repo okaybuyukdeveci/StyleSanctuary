@@ -72,7 +72,7 @@ Brief Tip: [One short styling tip based on the weather/occasion]
 
 def get_outfit_recommendation_with_images(weather: dict, context: dict, dataset_loader):
     """
-    Get LLM outfit recommendation along with matching images from dataset
+    Get outfit recommendation with real images from FashionRec dataset
     
     Args:
         weather: Weather data dictionary
@@ -83,16 +83,59 @@ def get_outfit_recommendation_with_images(weather: dict, context: dict, dataset_
         Dictionary with text recommendation, images, and dataset item IDs
     """
     # Get text recommendation from LLM
-    text_rec = get_outfit_recommendation(weather, context)
+    text_recommendation = get_outfit_recommendation(weather, context)
     
     # Get matching images from dataset
-    images = dataset_loader.get_matching_images(text_rec)
+    temperature = weather["temperature"]
     
-    # Extract dataset IDs
-    dataset_items = [img.get("id", 0) for img in images.values() if img]
+    # Fetch items by category
+    tops = dataset_loader.get_items_by_category("top", temperature, count=1)
+    bottoms = dataset_loader.get_items_by_category("bottom", temperature, count=1)
+    shoes = dataset_loader.get_items_by_category("shoes", temperature, count=1)
+    accessories = dataset_loader.get_items_by_category("accessories", temperature, count=1)
+    
+    # Prepare response
+    images = {}
+    dataset_items = []
+    
+    if tops:
+        images["top"] = {
+            "image_url": tops[0]["image_url"],
+            "title": tops[0]["title"],
+            "style": tops[0]["style"],
+            "color": tops[0]["color"]
+        }
+        dataset_items.append(tops[0]["id"])
+    
+    if bottoms:
+        images["bottom"] = {
+            "image_url": bottoms[0]["image_url"],
+            "title": bottoms[0]["title"],
+            "style": bottoms[0]["style"],
+            "color": bottoms[0]["color"]
+        }
+        dataset_items.append(bottoms[0]["id"])
+    
+    if shoes:
+        images["shoes"] = {
+            "image_url": shoes[0]["image_url"],
+            "title": shoes[0]["title"],
+            "style": shoes[0]["style"],
+            "color": shoes[0]["color"]
+        }
+        dataset_items.append(shoes[0]["id"])
+    
+    if accessories:
+        images["accessories"] = {
+            "image_url": accessories[0]["image_url"],
+            "title": accessories[0]["title"],
+            "style": accessories[0]["style"],
+            "color": accessories[0]["color"]
+        }
+        dataset_items.append(accessories[0]["id"])
     
     return {
-        "text_recommendation": text_rec,
+        "text_recommendation": text_recommendation,
         "images": images,
         "dataset_items": dataset_items
     }

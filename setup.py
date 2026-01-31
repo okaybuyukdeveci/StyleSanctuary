@@ -62,6 +62,23 @@ def setup_dataset():
         return False
 
 
+def download_fashionrec_dataset():
+    """Download FashionRec dataset on first setup"""
+    print("🌐 Downloading FashionRec dataset...")
+    
+    try:
+        from backend.dataset_loader import FashionDatasetLoader
+        
+        loader = FashionDatasetLoader()
+        print(f"   ✓ Dataset downloaded and cached with {len(loader.dataset)} items")
+        print("✅ FashionRec dataset ready!\n")
+        return True
+    except Exception as e:
+        print(f"   ❌ Dataset download failed: {e}")
+        print("   ⚠️  App will use fallback mock data\n")
+        return False
+
+
 def check_env_file():
     """Check if .env file exists and guide user"""
     print("🔑 Checking environment configuration...")
@@ -108,28 +125,26 @@ def check_dependencies():
     """Check if required packages are installed"""
     print("📦 Checking dependencies...")
     
+    # Package names match requirements.txt for consistency
     required_packages = [
-        "streamlit",
-        "requests",
-        "python-dotenv",
-        "PIL",
-        "pandas"
+        ("streamlit", "streamlit"),
+        ("requests", "requests"),
+        ("python-dotenv", "dotenv"),
+        ("PIL", "PIL"),
+        ("pandas", "pandas"),
+        ("datasets", "datasets"),
+        ("huggingface-hub", "huggingface_hub")
     ]
     
     missing_packages = []
     
-    for package in required_packages:
+    for display_name, import_name in required_packages:
         try:
-            if package == "python-dotenv":
-                __import__("dotenv")
-            elif package == "PIL":
-                __import__("PIL")
-            else:
-                __import__(package)
-            print(f"   ✓ {package}")
+            __import__(import_name)
+            print(f"   ✓ {display_name}")
         except ImportError:
-            print(f"   ❌ {package} not found")
-            missing_packages.append(package)
+            print(f"   ❌ {display_name} not found")
+            missing_packages.append(display_name)
     
     if missing_packages:
         print(f"\n   ⚠️  Missing packages detected!")
@@ -160,8 +175,8 @@ def main():
     # Setup database
     db_ok = setup_database()
     
-    # Setup dataset
-    dataset_ok = setup_dataset()
+    # Download FashionRec dataset
+    dataset_ok = download_fashionrec_dataset()
     
     # Check environment
     check_env_file()

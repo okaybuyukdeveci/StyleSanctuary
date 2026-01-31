@@ -7,9 +7,9 @@ AI destekli, hava durumuna göre kişiselleştirilmiş kombin önerisi uygulamas
 ## ✨ Özellikler
 
 - 🌤️ **Canlı Hava Durumu**: 5 şehir için anlık hava durumu
-- 🎨 **Quick Outfit Gallery**: Sorulara cevap vermeden 500+ kombin önerisi
+- 🎨 **Quick Outfit Gallery**: Sorulara cevap vermeden binlerce kombin önerisi
 - 🤖 **AI Destekli Öneriler**: Ollama LLM ile kişiselleştirilmiş kombinler
-- 📸 **Fashion Dataset**: Mock fashion dataset ile görsel öneriler
+- 📸 **Fashion Dataset**: HuggingFace FashionRec dataset ile gerçek kıyafet görselleri
 - 💾 **Kombin Kaydetme**: Geçmiş kombinlerinizi saklayın
 - 🎭 **Kişiselleştirme**: Ruh halinize, stilinize göre öneriler
 - 🎨 **Modern UI**: Glassmorphism efektleri ile modern arayüz
@@ -61,9 +61,11 @@ python setup.py
 
 Bu script:
 - ✓ Gerekli klasörleri oluşturur
-- ✓ Fashion dataset'ini (mock data) hazırlar
+- ✓ FashionRec dataset'ini HuggingFace'den indirir ve cache'ler
 - ✓ SQLite database'i oluşturur
 - ✓ Ortam değişkenlerini kontrol eder
+
+> **Not:** İlk kurulum sırasında FashionRec dataset'i indirilir (~500MB). Bu işlem 10-15 dakika sürebilir. Dataset cache'lendikten sonra yüklemeler hızlı olacaktır.
 
 6. **Uygulamayı başlatın**
 
@@ -162,20 +164,24 @@ AI, hava durumuna göre size özel kombin önerir!
 - **AI/LLM**: Ollama (Qwen 2.5:7b-instruct)
 - **Weather API**: OpenWeatherMap
 - **Database**: SQLite3
-- **Dataset**: Mock Fashion Dataset (500 items)
+- **Dataset**: HuggingFace FashionRec Dataset
 - **Python**: 3.8+
 
 ## 📊 Dataset
 
-Uygulama, 500 adet mock fashion item içeren bir dataset kullanır:
+Bu proje [HuggingFace FashionRec Dataset](https://huggingface.co/datasets/Anony100/FashionRec) kullanmaktadır.
 
-- **Kategoriler**: Upper, Lower, Shoes, Accessories, Outfit
+İlk kurulumda dataset'in yarısı otomatik olarak indirilir ve cache'lenir (~500MB).
+
+**Dataset Özellikleri:**
+- **Kaynak**: HuggingFace Anony100/FashionRec
+- **İçerik**: Gerçek kıyafet görselleri ve ürün bilgileri
+- **Kategoriler**: Tops, Bottoms, Shoes, Accessories
 - **Stiller**: Casual, Formal, Sporty, Chic, Classic
 - **Mevsimler**: Spring, Summer, Fall, Winter
 - **Cinsiyetler**: Male, Female, Unisex
-- **Özellikler**: Renk, etiketler, görsel URL'leri
 
-> **Not**: Production ortamında Hugging Face FashionRec dataset'i kullanılabilir.
+> **Not:** Dataset indirilemezse, uygulama otomatik olarak fallback mock data'ya geçer ve çalışmaya devam eder.
 
 ## 🎨 Özelleştirme
 
@@ -264,7 +270,15 @@ MIT License
 - [OpenWeatherMap API](https://openweathermap.org/)
 - [Ollama](https://ollama.ai/)
 - [Streamlit](https://streamlit.io/)
-- [Hugging Face](https://huggingface.co/) (FashionRec dataset inspiration)
+- [Hugging Face](https://huggingface.co/) - FashionRec Dataset
+- [Anony100/FashionRec Dataset](https://huggingface.co/datasets/Anony100/FashionRec)
+
+## 📄 Dataset Atıfı
+
+Bu proje HuggingFace FashionRec dataset'ini kullanmaktadır:
+- Dataset: Anony100/FashionRec
+- Platform: HuggingFace
+- URL: https://huggingface.co/datasets/Anony100/FashionRec
 
 ## 📸 Ekran Görüntüleri
 
