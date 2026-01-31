@@ -282,7 +282,7 @@ def render_personalized_form():
                 st.rerun()
                 
             except Exception as e:
-                st.error(f"Error generating outfit: {e}")
+                st.error(f"Failed to generate outfit recommendation. Please ensure Ollama is running (http://localhost:11434) and the qwen2.5:7b-instruct model is installed. Error: {e}")
 
 
 def render_outfit_results():

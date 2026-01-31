@@ -295,4 +295,4 @@ if not os.path.exists(METADATA_FILE):
     try:
         create_sample_metadata()
     except Exception as e:
-        print(f"Warning: Could not initialize dataset: {e}")
+        print(f"Warning: Could not initialize dataset structure. Please run setup.py to configure the dataset. Error: {e}")

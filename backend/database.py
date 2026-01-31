@@ -340,4 +340,4 @@ def add_preset_outfit(preset_data: Dict[str, Any]) -> int:
 try:
     init_db()
 except Exception as e:
-    print(f"Warning: Could not initialize database: {e}")
+    print(f"Warning: Could not initialize database. Please ensure the data directory is writable and try running setup.py. Error: {e}")
