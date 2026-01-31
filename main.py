@@ -1,6 +1,6 @@
 # main.py
-from weather import get_weather
-from agent import get_outfit_recommendation
+from backend.weather import get_weather
+from backend.agent import get_outfit_recommendation
 
 def main():
     print("\n" + "=" * 50)
