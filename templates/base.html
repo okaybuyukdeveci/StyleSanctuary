@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StyleSanctuary - Your Personal Fashion Assistant{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/">
+                    <span class="logo">👗</span>
+                    <span class="brand-name">StyleSanctuary</span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/browse" class="nav-link">Browse Outfits</a></li>
+                <li><a href="/recommend" class="nav-link">Get Recommendation</a></li>
+                <li><a href="/saved" class="nav-link">Saved Outfits</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 StyleSanctuary by Okay Büyükdeveci. Weather-based outfit recommendations.</p>
+            <p>Made with ❤️ for fashion enthusiasts</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

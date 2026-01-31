@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Get Recommendation - StyleSanctuary{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Get Personalized Recommendation</h1>
+        <p>Tell us about yourself and we'll create the perfect outfit for you</p>
+    </div>
+</section>
+
+<section class="recommend-section">
+    <div class="container">
+        <div class="form-container">
+            <form id="recommendForm" class="recommend-form">
+                <div class="form-group">
+                    <label for="city">Your City</label>
+                    <input type="text" id="city" name="city" placeholder="e.g., London, Istanbul, New York" required>
+                    <small>We'll check the weather in your city</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Unisex">Prefer not to say / Unisex</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="event">Where are you going?</label>
+                    <input type="text" id="event" name="event" placeholder="e.g., School, Office, Cafe, Party" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="style">Your Style Preference</label>
+                    <select id="style" name="style" required>
+                        <option value="">Select...</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Sporty">Sporty</option>
+                        <option value="Classic">Classic</option>
+                        <option value="Minimalist">Minimalist</option>
+                        <option value="Trendy">Trendy</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mood">How do you feel today?</label>
+                    <input type="text" id="mood" name="mood" placeholder="e.g., Energetic, Relaxed, Happy, Confident" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large">
+                    <span id="btnText">Get My Outfit Recommendation</span>
+                    <span id="btnLoading" style="display: none;">⏳ Analyzing...</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <div class="weather-info" id="weatherInfo"></div>
+            
+            <div class="ai-recommendation">
+                <h2>Your Personalized Outfit</h2>
+                <div id="aiRecommendation" class="recommendation-text"></div>
+                
+                <button id="saveOutfitBtn" class="btn btn-secondary" style="margin-top: 1rem;">
+                    💾 Save This Outfit
+                </button>
+            </div>
+
+            <div class="matching-outfits">
+                <h3>Similar Outfits from Our Collection</h3>
+                <div id="matchingOutfits" class="outfit-grid"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Save Outfit Modal -->
+<div id="saveModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Save Your Outfit</h2>
+        <form id="saveForm">
+            <div class="form-group">
+                <label for="outfitName">Outfit Name</label>
+                <input type="text" id="outfitName" name="outfitName" required>
+            </div>
+            <input type="hidden" id="saveCity" name="city">
+            <input type="hidden" id="saveTemp" name="temperature">
+            <input type="hidden" id="saveUpper" name="upper">
+            <input type="hidden" id="saveLower" name="lower">
+            <input type="hidden" id="saveShoes" name="shoes">
+            <input type="hidden" id="saveAccessories" name="accessories">
+            <button type="submit" class="btn btn-primary">Save Outfit</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentRecommendation = null;
+
+document.getElementById('recommendForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btnText = document.getElementById('btnText');
+    const btnLoading = document.getElementById('btnLoading');
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/api/recommend', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentRecommendation = data;
+            displayResults(data);
+        } else {
+            alert('Failed to get recommendation. Please try again.');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+});
+
+function displayResults(data) {
+    // Show results section
+    document.getElementById('resultsSection').style.display = 'block';
+    
+    // Display weather info
+    document.getElementById('weatherInfo').innerHTML = `
+        <div class="weather-card">
+            <h3>Weather in ${data.weather.city}</h3>
+            <p class="weather-temp">${data.weather.temperature}°C</p>
+            <p class="weather-condition">${data.weather.condition}</p>
+        </div>
+    `;
+    
+    // Display AI recommendation
+    document.getElementById('aiRecommendation').innerHTML = `
+        <pre style="white-space: pre-wrap; font-family: inherit;">${data.recommendation}</pre>
+    `;
+    
+    // Display matching outfits
+    const matchingDiv = document.getElementById('matchingOutfits');
+    if (data.matching_outfits && data.matching_outfits.length > 0) {
+        matchingDiv.innerHTML = data.matching_outfits.map(outfit => `
+            <div class="outfit-card">
+                <div class="outfit-image">
+                    <img src="${outfit.image}" alt="${outfit.name}">
+                </div>
+                <div class="outfit-info">
+                    <h4>${outfit.name}</h4>
+                    <p><strong>Upper:</strong> ${outfit.upper}</p>
+                    <p><strong>Lower:</strong> ${outfit.lower}</p>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        matchingDiv.innerHTML = '<p>No matching outfits found in our collection.</p>';
+    }
+    
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Save outfit functionality
+document.getElementById('saveOutfitBtn').addEventListener('click', () => {
+    if (currentRecommendation) {
+        document.getElementById('saveModal').style.display = 'block';
+        document.getElementById('saveCity').value = currentRecommendation.weather.city;
+        document.getElementById('saveTemp').value = currentRecommendation.weather.temperature;
+        
+        // Parse recommendation text to extract components (simplified)
+        const rec = currentRecommendation.recommendation;
+        document.getElementById('saveUpper').value = 'See recommendation';
+        document.getElementById('saveLower').value = 'See recommendation';
+        document.getElementById('saveShoes').value = 'See recommendation';
+        document.getElementById('saveAccessories').value = 'See recommendation';
+    }
+});
+
+document.getElementById('closeModal').onclick = () => {
+    document.getElementById('saveModal').style.display = 'none';
+};
+
+document.getElementById('saveForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/api/save-outfit', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Outfit saved successfully!');
+            document.getElementById('saveModal').style.display = 'none';
+            document.getElementById('saveForm').reset();
+        }
+    } catch (error) {
+        alert('Error saving outfit: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

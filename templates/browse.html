@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Outfits - StyleSanctuary{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Browse Outfit Ideas</h1>
+        <p>Explore our complete collection of weather-appropriate outfits</p>
+    </div>
+</section>
+
+<section class="browse-section">
+    <div class="container">
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Style:</label>
+                <select id="styleFilter" class="filter-select">
+                    <option value="">All Styles</option>
+                    <option value="casual">Casual</option>
+                    <option value="sporty">Sporty</option>
+                    <option value="classic">Classic</option>
+                    <option value="minimalist">Minimalist</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Season:</label>
+                <select id="seasonFilter" class="filter-select">
+                    <option value="">All Seasons</option>
+                    <option value="spring">Spring</option>
+                    <option value="summer">Summer</option>
+                    <option value="autumn">Autumn</option>
+                    <option value="winter">Winter</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Gender:</label>
+                <select id="genderFilter" class="filter-select">
+                    <option value="">All</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="unisex">Unisex</option>
+                </select>
+            </div>
+            <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+        </div>
+
+        <!-- Outfit Grid -->
+        <div class="outfit-grid" id="outfitGrid">
+            {% for outfit in outfits %}
+            <div class="outfit-card" data-outfit-id="{{ outfit.id }}" data-style="{{ outfit.style }}" data-season="{{ outfit.season }}" data-gender="{{ outfit.gender }}">
+                <div class="outfit-image">
+                    <img src="{{ outfit.image }}" alt="{{ outfit.name }}" loading="lazy">
+                    <div class="outfit-overlay">
+                        <button class="btn-icon view-details" data-outfit-id="{{ outfit.id }}">
+                            <span>👁️</span> View Details
+                        </button>
+                    </div>
+                </div>
+                <div class="outfit-info">
+                    <h3 class="outfit-name">{{ outfit.name }}</h3>
+                    <div class="outfit-meta">
+                        <span class="badge badge-{{ outfit.style }}">{{ outfit.style }}</span>
+                        <span class="badge badge-season">{{ outfit.season }}</span>
+                        <span class="temp-range">{{ outfit.temp_range[0] }}° - {{ outfit.temp_range[1] }}°C</span>
+                    </div>
+                    <p class="outfit-desc">
+                        <strong>Top:</strong> {{ outfit.upper }}<br>
+                        <strong>Bottom:</strong> {{ outfit.lower }}<br>
+                        <strong>Shoes:</strong> {{ outfit.shoes }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Outfit Detail Modal -->
+<div id="outfitModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modalBody"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Filter functionality
+document.getElementById('applyFilters').addEventListener('click', () => {
+    const style = document.getElementById('styleFilter').value.toLowerCase();
+    const season = document.getElementById('seasonFilter').value.toLowerCase();
+    const gender = document.getElementById('genderFilter').value.toLowerCase();
+    
+    document.querySelectorAll('.outfit-card').forEach(card => {
+        const cardStyle = card.dataset.style.toLowerCase();
+        const cardSeason = card.dataset.season.toLowerCase();
+        const cardGender = card.dataset.gender.toLowerCase();
+        
+        const matchStyle = !style || cardStyle === style;
+        const matchSeason = !season || cardSeason === season || cardSeason === 'all';
+        const matchGender = !gender || cardGender === gender || cardGender === 'unisex';
+        
+        if (matchStyle && matchSeason && matchGender) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Modal functionality
+const modal = document.getElementById('outfitModal');
+const closeBtn = document.querySelector('.close');
+
+document.querySelectorAll('.view-details').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        const outfitId = e.target.closest('.view-details').dataset.outfitId;
+        
+        const response = await fetch('/api/outfits');
+        const outfits = await response.json();
+        const outfit = outfits.find(o => o.id == outfitId);
+        
+        if (outfit) {
+            document.getElementById('modalBody').innerHTML = `
+                <h2>${outfit.name}</h2>
+                <img src="${outfit.image}" alt="${outfit.name}" style="width: 100%; max-width: 400px; border-radius: 12px; margin: 1rem 0;">
+                <div class="outfit-details">
+                    <p><strong>Upper Garments:</strong> ${outfit.upper}</p>
+                    <p><strong>Lower Garments:</strong> ${outfit.lower}</p>
+                    <p><strong>Shoes:</strong> ${outfit.shoes}</p>
+                    <p><strong>Accessories:</strong> ${outfit.accessories}</p>
+                    <p><strong>Style:</strong> ${outfit.style} | <strong>Season:</strong> ${outfit.season}</p>
+                    <p><strong>Temperature Range:</strong> ${outfit.temp_range[0]}°C - ${outfit.temp_range[1]}°C</p>
+                    <p><strong>Suitable for:</strong> ${outfit.gender === 'unisex' ? 'Everyone' : outfit.gender}</p>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+    });
+});
+
+closeBtn.onclick = () => modal.style.display = 'none';
+window.onclick = (e) => {
+    if (e.target == modal) modal.style.display = 'none';
+};
+</script>
+{% endblock %}

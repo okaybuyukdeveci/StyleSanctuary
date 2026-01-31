@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Outfits - StyleSanctuary{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Your Saved Outfits</h1>
+        <p>Your personal collection of favorite outfit combinations</p>
+    </div>
+</section>
+
+<section class="saved-section">
+    <div class="container">
+        {% if saved_outfits %}
+        <div class="saved-grid">
+            {% for outfit in saved_outfits %}
+            <div class="saved-card">
+                <div class="saved-header">
+                    <h3>{{ outfit.name }}</h3>
+                    <span class="saved-date">{{ outfit.saved_at[:10] }}</span>
+                </div>
+                <div class="saved-body">
+                    <p><strong>📍 Location:</strong> {{ outfit.city }}</p>
+                    <p><strong>🌡️ Temperature:</strong> {{ outfit.temperature }}°C</p>
+                    <p><strong>👔 Upper:</strong> {{ outfit.upper }}</p>
+                    <p><strong>👖 Lower:</strong> {{ outfit.lower }}</p>
+                    <p><strong>👟 Shoes:</strong> {{ outfit.shoes }}</p>
+                    <p><strong>💼 Accessories:</strong> {{ outfit.accessories }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h2>No Saved Outfits Yet</h2>
+            <p>Start by getting a personalized recommendation and save your favorite outfits!</p>
+            <a href="/recommend" class="btn btn-primary">Get Recommendation</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

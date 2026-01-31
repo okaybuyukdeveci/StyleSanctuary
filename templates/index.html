@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Your Personal Fashion Sanctuary</h1>
+            <p class="hero-subtitle">Weather-smart outfit recommendations tailored to your style, mood, and occasion</p>
+            <div class="hero-cta">
+                <a href="/recommend" class="btn btn-primary">Get Personalized Recommendation</a>
+                <a href="/browse" class="btn btn-secondary">Browse Outfit Ideas</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Outfits Section -->
+<section class="featured-section">
+    <div class="container">
+        <h2 class="section-title">Trending Outfit Ideas</h2>
+        <p class="section-subtitle">Browse our curated collection of weather-appropriate outfits</p>
+        
+        <div class="outfit-grid">
+            {% for outfit in outfits %}
+            <div class="outfit-card" data-outfit-id="{{ outfit.id }}">
+                <div class="outfit-image">
+                    <img src="{{ outfit.image }}" alt="{{ outfit.name }}" loading="lazy">
+                    <div class="outfit-overlay">
+                        <button class="btn-icon view-details" data-outfit-id="{{ outfit.id }}">
+                            <span>👁️</span> View Details
+                        </button>
+                    </div>
+                </div>
+                <div class="outfit-info">
+                    <h3 class="outfit-name">{{ outfit.name }}</h3>
+                    <div class="outfit-meta">
+                        <span class="badge badge-{{ outfit.style }}">{{ outfit.style }}</span>
+                        <span class="badge badge-season">{{ outfit.season }}</span>
+                        <span class="temp-range">{{ outfit.temp_range[0] }}° - {{ outfit.temp_range[1] }}°C</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center" style="margin-top: 3rem;">
+            <a href="/browse" class="btn btn-outline">View All Outfits</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">Why StyleSanctuary?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🌤️</div>
+                <h3>Weather-Smart</h3>
+                <p>Get outfit suggestions based on real-time weather conditions in your city</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h3>Personalized Style</h3>
+                <p>Recommendations tailored to your style preferences, mood, and occasion</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3>Save Favorites</h3>
+                <p>Keep track of your favorite outfits and build your personal style collection</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Curated Collection</h3>
+                <p>Browse through pre-designed outfits for every season and occasion</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Outfit Detail Modal -->
+<div id="outfitModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modalBody">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Modal functionality
+const modal = document.getElementById('outfitModal');
+const closeBtn = document.querySelector('.close');
+
+document.querySelectorAll('.view-details').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        const outfitId = e.target.closest('.view-details').dataset.outfitId;
+        
+        // Fetch outfit details
+        const response = await fetch('/api/outfits');
+        const outfits = await response.json();
+        const outfit = outfits.find(o => o.id == outfitId);
+        
+        if (outfit) {
+            document.getElementById('modalBody').innerHTML = `
+                <h2>${outfit.name}</h2>
+                <img src="${outfit.image}" alt="${outfit.name}" style="width: 100%; max-width: 400px; border-radius: 12px; margin: 1rem 0;">
+                <div class="outfit-details">
+                    <p><strong>Upper Garments:</strong> ${outfit.upper}</p>
+                    <p><strong>Lower Garments:</strong> ${outfit.lower}</p>
+                    <p><strong>Shoes:</strong> ${outfit.shoes}</p>
+                    <p><strong>Accessories:</strong> ${outfit.accessories}</p>
+                    <p><strong>Style:</strong> ${outfit.style} | <strong>Season:</strong> ${outfit.season}</p>
+                    <p><strong>Temperature Range:</strong> ${outfit.temp_range[0]}°C - ${outfit.temp_range[1]}°C</p>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+    });
+});
+
+closeBtn.onclick = () => modal.style.display = 'none';
+window.onclick = (e) => {
+    if (e.target == modal) modal.style.display = 'none';
+};
+</script>
+{% endblock %}
